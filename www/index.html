@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Hello wasm-pack!</title>
+</head>
+<body>
+
+<input type="file" id="file-input">
+<label for="format-input"></label><input type="text" id="format-input">
+<input type="button" id="convert-button" value="convert">
+<input type="button" value="clear" id="clear-button">
+<div id="img-div">
+</div>
+
+<script src="./bootstrap.js"></script>
+<script>
+    let fileInput = document.getElementById("file-input");
+    let formatInput = document.getElementById("format-input");
+    let convertButton = document.getElementById("convert-button");
+    let imageDiv = document.getElementById("img-div");
+    let clearButton = document.getElementById("clear-button");
+
+    let data = null
+
+    fileInput.addEventListener('change', () => {
+
+        let reader = new FileReader();
+        reader.onload = () => {
+            // noinspection JSCheckFunctionSignatures
+            data = new Uint8Array(reader.result);
+        }
+        if (fileInput.files.length === 0) {
+            data = null
+        } else {
+            reader.readAsArrayBuffer(fileInput.files[0]);
+        }
+    }, false);
+
+    convertButton.onclick = () => {
+        if (data != null) {
+            try {
+                let result = wasmCall(data, formatInput.value);
+                console.log(result);
+
+                let newImg = document.createElement("img");
+                newImg.src = result
+                imageDiv.appendChild(newImg)
+            } catch (e) {
+                console.log(e);
+                alert("err: " + e)
+            }
+        }
+    }
+
+    clearButton.onclick = () => {
+        if (imageDiv.childNodes.length !== 0) {
+            imageDiv.childNodes.forEach((c) => imageDiv.removeChild(c))
+        }
+    }
+</script>
+</body>
+</html>
